@@ -16,6 +16,7 @@
 
 class User < ApplicationRecord
   include BCrypt
+  include Jwtoken
 
   def password
     @password ||= Password.new(password_digest)
