@@ -9,6 +9,13 @@ class AuthController < ApplicationController
     render json: { data: { token: @user.jwt } }
   end
 
+  def refresh
+    payloader = User.decode_jwt params[:token]
+    user = User.find payloader[0]['id']
+    user.payload['scope'] = payloader[0]['scope']
+    render json: { data: { token: user.jwt } }
+  end
+
   private
 
   def auth_login_user

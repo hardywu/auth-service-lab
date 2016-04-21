@@ -1,6 +1,7 @@
 Rails.application.routes.draw do
   constraints(format: 'json') do
     post 'login', to: 'auth#login'
+    get 'token-refresh', to: 'auth#refresh'
   end
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
 

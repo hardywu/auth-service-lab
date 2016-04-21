@@ -42,4 +42,14 @@ class AuthControllerTest < ActionDispatch::IntegrationTest
     user = User.find_by_jwt reply['data']['token']
     assert_equal user.id, @mobile_user.id
   end
+
+  test "refresh token with an old one" do
+    get token_refresh_url, params: { token: @mobile_user.jwt }
+    assert_match 'token', @response.body
+
+    # check expiration time is refreshed
+    reply = JSON.parse @response.body
+    payloader = User.decode_jwt reply['data']['token']
+    assert payloader[0]['exp'] > 23 * 3600 + Time.now.to_i
+  end
 end
