@@ -3,6 +3,7 @@ class AuthController < ApplicationController
   end
 
   rescue_from AuthError, with: :render_auth_error
+  rescue_from JWT::ExpiredSignature, with: :render_auth_error
 
   def login
     auth_login_user
@@ -30,6 +31,6 @@ class AuthController < ApplicationController
 
   def render_auth_error(error)
     render json: { errors: [{ id: 'AuthError', detail: error.message }] },
-           status: status
+           status: :unauthorized
   end
 end

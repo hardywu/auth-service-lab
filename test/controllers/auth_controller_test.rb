@@ -43,6 +43,26 @@ class AuthControllerTest < ActionDispatch::IntegrationTest
     assert_equal user.id, @mobile_user.id
   end
 
+  test "login with wrong pin" do
+    cred = phone_credential
+    cred[:pin] = '0000'
+    post login_url, params: cred.to_json, headers: @headers
+
+    assert_response :unauthorized
+    assert_match 'errors', @response.body
+    assert_match 'AuthError', @response.body
+  end
+
+  test "login with non-existing email" do
+    cred = email_credential
+    cred[:email] = 'not@found.com'
+    post login_url, params: cred.to_json, headers: @headers
+
+    assert_response :unauthorized
+    assert_match 'errors', @response.body
+    assert_match 'AuthError', @response.body
+  end
+
   test "refresh token with an old one" do
     get token_refresh_url, params: { token: @mobile_user.jwt }
     assert_match 'token', @response.body
@@ -51,5 +71,16 @@ class AuthControllerTest < ActionDispatch::IntegrationTest
     reply = JSON.parse @response.body
     payloader = User.decode_jwt reply['data']['token']
     assert payloader[0]['exp'] > 23 * 3600 + Time.now.to_i
+  end
+
+  test "refresh token with an expired one" do
+    token = @mobile_user.jwt
+    Timecop.freeze(Time.zone.today + 2) do
+      get token_refresh_url, params: { token: token }
+
+      assert_response :unauthorized
+      assert_match 'errors', @response.body
+      assert_match 'AuthError', @response.body
+    end
   end
 end
