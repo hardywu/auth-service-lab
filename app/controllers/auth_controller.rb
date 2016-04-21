@@ -19,21 +19,13 @@ class AuthController < ApplicationController
   private
 
   def auth_login_user
-    case params[:credential_type]
-    when 1
-      @user = User.find_by! email: params[:email]
-      unless @user.password == params[:password]
-        raise AuthError, 'Invalide email/password combination'
-      end
-    when 2
-      @user = User.find_by! phone: params[:phone]
-      unless @user.pin == params[:pin]
-        raise AuthError, 'Invalide phone/pin combination'
-      end
-    else
-      raise AuthError, 'Invalide credential type'
-    end
+    @user = User.find_and_authenticate_by login_params
+    raise AuthError, 'Invalid credential' unless @user
     @user.payload['scope'] = params[:scope]
+  end
+
+  def login_params
+    params.permit(:credential_type, :email, :password, :phone, :pin)
   end
 
   def render_auth_error(error)

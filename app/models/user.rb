@@ -14,6 +14,7 @@
 #  updated_at         :datetime         not null
 #
 
+# User Model
 class User < ApplicationRecord
   include BCrypt
   include Jwtoken
@@ -34,5 +35,26 @@ class User < ApplicationRecord
 
   def pin
     @pin ||= Password.new(pin_digest)
+  end
+
+  def self.find_and_authenticate_by(arg = {})
+    case arg[:credential_type]
+    when 1
+      User.find_and_auth_by_pc email: arg[:email], password: arg[:password]
+    when 2
+      User.find_and_auth_by_mobile phone: arg[:phone], pin: arg[:pin]
+    end
+  end
+
+  def self.find_and_auth_by_mobile(phone:, pin:)
+    user = User.find_by phone: phone
+    return false unless user.try(:pin) == pin
+    user
+  end
+
+  def self.find_and_auth_by_pc(email:, password:)
+    user = User.find_by email: email
+    return false unless user.try(:password) == password
+    user
   end
 end
