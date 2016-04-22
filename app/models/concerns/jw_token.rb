@@ -1,6 +1,8 @@
 # module for model with JWT
-module Jwtoken
+module JWToken
   extend ActiveSupport::Concern
+  class AuthError < StandardError
+  end
 
   included do
     attr_writer :payload

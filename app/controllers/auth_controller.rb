@@ -1,8 +1,5 @@
 class AuthController < ApplicationController
-  class AuthError < StandardError
-  end
-
-  rescue_from AuthError, with: :render_auth_error
+  rescue_from JWToken::AuthError, with: :render_auth_error
   rescue_from JWT::ExpiredSignature, with: :render_auth_error
 
   def login
@@ -21,7 +18,6 @@ class AuthController < ApplicationController
 
   def auth_login_user
     @user = User.find_and_authenticate_by login_params
-    raise AuthError, 'Invalid credential' unless @user
     @user.payload['scope'] = params[:scope]
   end
 

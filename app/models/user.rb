@@ -17,7 +17,7 @@
 # User Model
 class User < ApplicationRecord
   include BCrypt
-  include Jwtoken
+  include JWToken
 
   def password
     @password ||= Password.new(password_digest)
@@ -48,13 +48,13 @@ class User < ApplicationRecord
 
   def self.find_and_auth_by_mobile(phone:, pin:)
     user = User.find_by phone: phone
-    return false unless user.try(:pin) == pin
+    raise AuthError, 'Invalid credential' unless user.try(:pin) == pin
     user
   end
 
   def self.find_and_auth_by_pc(email:, password:)
     user = User.find_by email: email
-    return false unless user.try(:password) == password
+    raise AuthError, 'Invalid credential' unless user.try(:password) == password
     user
   end
 end
