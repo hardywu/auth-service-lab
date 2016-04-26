@@ -3,7 +3,12 @@ class AuthController < ApplicationController
   rescue_from JWT::ExpiredSignature, with: :render_auth_error
 
   def login
-    auth_login_user
+    auth_user
+    render json: { data: { token: @user.jwt } }
+  end
+
+  def mobile_login
+    auth_mobile_user
     render json: { data: { token: @user.jwt } }
   end
 
@@ -16,13 +21,18 @@ class AuthController < ApplicationController
 
   private
 
-  def auth_login_user
-    @user = User.find_and_authenticate_by login_params
+  def auth_user
+    @user = credential_class.find_and_authenticate_by login_params
     @user.payload['scope'] = params[:scope]
   end
 
+  def credential_class
+    user_classes = { 1 => User, 2 => MobileUser }
+    user_classes[params[:credential_type]]
+  end
+
   def login_params
-    params.permit(:credential_type, :email, :password, :phone, :pin)
+    params.permit(:email, :password, :phone, :pin)
   end
 
   def render_auth_error(error)

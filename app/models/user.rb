@@ -38,23 +38,9 @@ class User < ApplicationRecord
   end
 
   def self.find_and_authenticate_by(arg = {})
-    case arg[:credential_type]
-    when 1
-      User.find_and_auth_by_pc email: arg[:email], password: arg[:password]
-    when 2
-      User.find_and_auth_by_mobile phone: arg[:phone], pin: arg[:pin]
-    end
-  end
-
-  def self.find_and_auth_by_mobile(phone:, pin:)
-    user = User.find_by phone: phone
-    raise AuthError, 'Invalid credential' unless user.try(:pin) == pin
-    user
-  end
-
-  def self.find_and_auth_by_pc(email:, password:)
-    user = User.find_by email: email
-    raise AuthError, 'Invalid credential' unless user.try(:password) == password
+    user = find_by email: arg[:email]
+    raise AuthError, 'Invalid credential' unless
+      user.try(:password) == arg[:password]
     user
   end
 end
