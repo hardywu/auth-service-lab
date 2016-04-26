@@ -63,6 +63,16 @@ class AuthControllerTest < ActionDispatch::IntegrationTest
     assert_match 'AuthError', @response.body
   end
 
+  test "login with wrong credential_type" do
+    cred = email_credential
+    cred[:credential_type] = 3
+    post login_url, params: cred.to_json, headers: @headers
+
+    assert_response :unauthorized
+    assert_match 'errors', @response.body
+    assert_match 'AuthError', @response.body
+  end
+
   test "refresh token with an old one" do
     get token_refresh_url, params: { token: @mobile_user.jwt }
     assert_match 'token', @response.body

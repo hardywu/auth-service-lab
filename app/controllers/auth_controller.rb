@@ -23,7 +23,9 @@ class AuthController < ApplicationController
 
   def credential_class
     user_classes = { 1 => User, 2 => MobileUser }
-    user_classes[params[:credential_type]]
+    user_class = user_classes[params[:credential_type]]
+    raise JWToken::AuthError, 'invalid credential type' unless user_class
+    user_class
   end
 
   def login_params
