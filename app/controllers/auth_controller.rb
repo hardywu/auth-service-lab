@@ -7,11 +7,6 @@ class AuthController < ApplicationController
     render json: { data: { token: @user.jwt } }
   end
 
-  def mobile_login
-    auth_mobile_user
-    render json: { data: { token: @user.jwt } }
-  end
-
   def refresh
     payloader = User.decode_jwt params[:token]
     user = User.find payloader[0]['id']
